@@ -3,96 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World Timer</title>
+    <title>Banner Tracker v6.3</title>
     <style>
-        /* Modern, Minimalist Style (Timenite-inspired) */
         body {
-            background-color: #0f172a; /* Dark blue-black */
-            color: white;
-            font-family: 'Inter', -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #0b0e14;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
-        h1 { font-size: 2rem; opacity: 0.8; margin-bottom: 0; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Banner Header */
+        .phase-title { font-size: 1.5rem; color: #60a5fa; margin-bottom: 10px; }
+        
+        /* Timer Style */
         #timer {
-            font-size: 8rem;
-            font-weight: 800;
-            font-variant-numeric: tabular-nums; /* Prevents text jumping */
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: monospace;
+            background: #1e293b;
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 12px;
             margin: 20px 0;
+            border: 1px solid #334155;
         }
-        .controls { display: flex; gap: 10px; }
-        button {
-            background: #334155;
-            border: none;
-            color: white;
-            padding: 10px 20px;
+
+        /* Side-by-Side Images */
+        .image-gallery {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .image-gallery img {
+            width: 30%; /* Shows 3 side-by-side */
+            min-width: 250px;
             border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
+            border: 2px solid #334155;
+            transition: transform 0.3s;
         }
-        button:hover { background: #475569; }
-        #startBtn { background: #22c55e; } /* Green */
-        #startBtn:hover { background: #16a34a; }
+        .image-gallery img:hover { transform: scale(1.05); }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>Hello World.</h1>
-    <div id="timer">05:00</div>
+<div class="container">
+    <h1 id="current-title">Current Banner: Phase 1</h1>
+    
+    <div id="timer">00d 00h 00m 00s</div>
 
-    <div class="controls">
-        <button id="startBtn">Start</button>
-        <button id="resetBtn">Reset</button>
+    <div id="phase1-content" class="image-gallery">
+        <img src="archive/v63/phase1/img1.png" alt="Banner 1">
+        <img src="archive/v63/phase1/img2.png" alt="Banner 2">
+        <img src="archive/v63/phase1/img3.png" alt="Banner 3">
     </div>
 
-    <script>
-        let timeLeft = 300; // 5 minutes in seconds
-        let timerId = null;
+    <div id="phase2-content" class="image-gallery hidden">
+        <img src="archive/v63/phase2/img1.png" alt="Upcoming 1">
+        <img src="archive/v63/phase2/img2.png" alt="Upcoming 2">
+        <img src="archive/v63/phase2/img3.png" alt="Upcoming 3">
+    </div>
+</div>
 
-        const timerDisplay = document.getElementById('timer');
-        const startBtn = document.getElementById('startBtn');
-        const resetBtn = document.getElementById('resetBtn');
+<script>
+    // Dates based on your guide
+    const phase1End = new Date("February 3, 2026 18:00:00").getTime();
+    const phase2End = new Date("February 24, 2026 18:00:00").getTime();
 
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    function updateTimer() {
+        const now = new Date().getTime();
+        let targetDate = phase1End;
+        let activePhase = 1;
+
+        // Check if Phase 1 has passed
+        if (now > phase1End) {
+            targetDate = phase2End;
+            activePhase = 2;
+            document.getElementById('phase1-content').classList.add('hidden');
+            document.getElementById('phase2-content').classList.remove('hidden');
+            document.getElementById('current-title').textContent = "Current Banner: Phase 2";
         }
 
-        startBtn.addEventListener('click', () => {
-            if (timerId) {
-                clearInterval(timerId);
-                timerId = null;
-                startBtn.textContent = 'Start';
-                startBtn.style.background = '#22c55e';
-            } else {
-                startBtn.textContent = 'Pause';
-                startBtn.style.background = '#ef4444'; // Red
-                timerId = setInterval(() => {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateDisplay();
-                    } else {
-                        clearInterval(timerId);
-                        alert("Time's up!");
-                    }
-                }, 1000);
-            }
-        });
+        const distance = targetDate - now;
 
-        resetBtn.addEventListener('click', () => {
-            clearInterval(timerId);
-            timerId = null;
-            timeLeft = 300;
-            updateDisplay();
-            startBtn.textContent = 'Start';
-            startBtn.style.background = '#22c55e';
-        });
-    </script>
+        if (distance < 0) {
+            document.getElementById("timer").innerHTML = "BANNER EXPIRED";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("timer").innerHTML = 
+            `${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+</script>
+
 </body>
 </html>
